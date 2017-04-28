@@ -1,99 +1,132 @@
 package services;
 
-import java.util.*;
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
+import java.util.ArrayList;
 
-public class EmailService
-{
-	private String emailTo;
-	private String emailFrom;
-	private String host;
-	private Properties properties;
-	private Session session;
-	private final String username = "onlinebiddingrad@gmail.com";
-	private final String password = "RADWPL2016";
-	
-	public void setEmailTo(String to)
-	{
-		this.emailTo=to;
-	}
-	
-	public void setEmailFrom(String from)
-	{
-		this.emailFrom=from;
-	}
-	
-	public void setHost(String host)
-	{
-		this.host=host;
-	}
-	
-	public void setProperties()
-	{		
-		properties = new Properties();
-		properties.put("mail.smtp.auth", "true");
-		properties.put("mail.smtp.starttls.enable", "true");
-		properties.put("mail.smtp.host", host);
-		properties.put("mail.smtp.port", "587");
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-	}
-	
-	public void setSession()
-	{
-		session = Session.getInstance(properties,
-				new javax.mail.Authenticator() {
-					protected PasswordAuthentication getPasswordAuthentication() {
-						return new PasswordAuthentication(username,password);
-					}
-				});
-	}
-	
-	public String getEmailTo()
-	{
-		return emailTo;
-	}
-	
-	public String getEmailFrom()
-	{
-		return emailFrom;
-	}
-	
-	public String getHost()
-	{
-		return host;
-	}
-	
-	public Properties getObjProperties()
-	{
-		return properties;
-	}
-	
-	public Session getCurrentSession()
-	{
-		return session;
-	}
-	
-	public void sendEmail(String subject, String msg)
-	{		
-		try {
+import com.google.gson.Gson;
 
-			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(emailFrom));
-			message.setRecipients(Message.RecipientType.TO,
-				InternetAddress.parse(emailTo));
-			message.setSubject(subject);
-			message.setText(msg);
+import DAO.DBOperation;
+import beans.RegisterBidBean;
+import beans.RegisterBidsBean;
 
-			Transport.send(message);
-
-			System.out.println("Done");
-
-		} catch (MessagingException e) {
-			throw new RuntimeException(e);
-		}
+@Path("/emailservice")
+public class EmailService {
+	
+	@Path("/newbid")
+	@POST
+	@Consumes("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
+	public Response addNewUser(String data) {
+		boolean response = false;
+		//ArrayList<ArrayList<String>> isAddNewUserSuccessful = true; //should be set to false
+		Gson gson = new Gson();
+		RegisterBidBean user = gson.fromJson(data, RegisterBidBean.class);
+		RegisterBidsBean products= new RegisterBidsBean();
+		String itemId = user.getItemID();
+		String itemName = user.getItemName();
+		String itemPrice = user.getActPrice();
+		String bidderId = user.getBidderId();
+		String postUserId = user.getPostUserID();
+		String postUserEmail = user.getPostUserEmail();
+		String bidUserEmail = user.getBidUserEmail();
+		String itemCount = user.getItemCount();
 		
+		System.out.println("this is the email address entered are: " + postUserEmail + " " + bidUserEmail );
+		//DBOperation dao = new DBOperation();
+		System.out.println(bidderId);
+		System.out.println(postUserId);
+		ArrayList<ArrayList<String>> isAddNewUserSuccessful = DBOperation.emailCart(itemId, itemName, itemPrice, bidderId, postUserId, postUserEmail,bidUserEmail,itemCount);
+		System.out.println("isPlaceOrderSuccessful results: " + isAddNewUserSuccessful);
+		
+		//sql code to add userInformation to database goes here
+		
+
+		if(isAddNewUserSuccessful != null){
+			response = true;
+			//search.setsearchResult(searchResult);
+			products.setValidationSearch(response);
+			
+			Email email = new Email();
+			email.setEmailTo(bidUserEmail);
+			email.setEmailFrom("bid@auctionware.com");
+			email.setHost("smtp.gmail.com");
+			email.setProperties();
+			email.setSession();
+			// debug code -> 
+			System.out.println(bidUserEmail);
+			
+			
+			//default message for now
+			String subject = "Order Confirmation";
+			String msg = "Congratulations " + postUserId + " your product has been bought by " + bidderId +
+						"\n\nYou will receive the payment and shipping details soon !!!";
+			
+			email.sendEmail(subject, msg); 
+			Email email2 = new Email();
+			email2.setEmailTo(postUserEmail);
+			email2.setEmailFrom("onlinebiddingrad@gmail.com");
+			email2.setHost("smtp.gmail.com");
+			email2.setProperties();
+			email2.setSession();
+			// debug code -> System.out.println(emailAddress);
+			System.out.println(postUserEmail);
+			
+			//default message for now
+			String subject1 = "Order Confirmation";
+			String msg1 = "Congratulations " + bidderId + " you've have purchased a product from " + postUserId +
+						"\n\nWe have received the payment and will ship items soon !!!";
+			
+			email2.sendEmail(subject1, msg1); 
+			
+			for(int index=0;index < isAddNewUserSuccessful.size();index++)
+			{
+				RegisterBidBean product = new RegisterBidBean();
+				product.setItemName(isAddNewUserSuccessful.get(index).get(0));
+				product.setActPrice(isAddNewUserSuccessful.get(index).get(1));
+				product.setBidUserEmail(isAddNewUserSuccessful.get(index).get(2));
+				product.setPostUserEmail(isAddNewUserSuccessful.get(index).get(3));
+				product.setItemCount(isAddNewUserSuccessful.get(index).get(4));
+				product.setItemID(isAddNewUserSuccessful.get(index).get(5));
+				//product.setImage(searchResult.get(index).get(12));
+				
+				products.addProducts(product);
+				
+				//System.out.println("cart bis is : " + product.getItemName());
+				
+				//System.out.println(searchResult.get(index).get(0));
+		
+			}
+			
+			
+		}
+		else
+		{
+			response = false;
+			//search.setValidation(response);
+			
+		}
+		//System.out.println("value of string is: " + String.valueOf(response));
+		//return Response.ok().entity(String.valueOf(response)).build();
+		
+		Gson searchResultJson = new Gson();
+		String responseData = searchResultJson.toJson(products);
+		//System.out.println("value of string is: " + responseData);
+		return Response.ok().entity(responseData).build();
+	}
+	
+	@Path("/availableusername/{username}")
+	@GET
+	public String availableUsername(@PathParam("username") String username) {
+		//code here to see if userName exists		
+		return username + "001";
 	}
 
 }

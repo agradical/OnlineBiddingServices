@@ -55,7 +55,7 @@ public class SignUpServices {
 		if(isAddNewUserSuccessful){
 			response = true;
 			System.out.println("value of string is: " + String.valueOf(response));
-			EmailService email = new EmailService();
+			Email email = new Email();
 			email.setEmailTo(emailAddress);
 			email.setEmailFrom("noreply@auctionware.com");
 			email.setHost("smtp.gmail.com");
