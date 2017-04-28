@@ -80,14 +80,9 @@ public class SearchProductServices {
 				//product.setImage(searchResult.get(index).get(12));
 				
 				products.addProducts(product);
-				
-				//System.out.println("book isbn is: " + book.getIsbn());
-				
-				//System.out.println(searchResult.get(index).get(0));
 		
 			}
 			logger.info("Search product title: "+title+": SUCCESS");
-			//books.getBooks();
 		}
 		else {
 			response = false;

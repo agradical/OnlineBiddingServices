@@ -19,7 +19,6 @@ import com.google.gson.Gson;
 
 import DAO.DBOperation;
 import beans.ProductBean;
-//import beans.Books;
 import beans.PostBean;
 import beans.ProductsBean;
 import beans.RegisterBidBean;
@@ -77,10 +76,7 @@ public class DisplayPostBids {
 				System.out.println(product.getItemID());
 				
 				products.addProducts(product);
-				//System.out.println(products.getUSERNAME(index));
-				//System.out.println("book isbn is: " + book.getIsbn());
-				
-				//System.out.println(searchResult.get(index).get(0));
+
 		
 			}
 			

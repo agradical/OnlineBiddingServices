@@ -228,18 +228,7 @@ public boolean isValidPost() {
 
 	public void getProducts()
 	{
-		System.out.println("size of books stored is: " + products.size() );
-		for(int index = 0; index < products.size(); index++)
-		{
-			/*System.out.println("books isbn printed out: " + books.get(index).getIsbn());
-			System.out.println("books title printed out: " + books.get(index).getTitle());
-			System.out.println("books price printed out: " + books.get(index).getPrice());
-			System.out.println("books quantity printed out: " + books.get(index).getInventory());
-			System.out.println("books author printed out: " + books.get(index).getAuthor());
-			System.out.println("----BOOK DIVIDER------------" );*/
-			
-			//System.out.println(book.getTitle());
-		}	
+		
 	}
 
 }

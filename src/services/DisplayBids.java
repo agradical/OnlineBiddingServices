@@ -19,7 +19,6 @@ import com.google.gson.Gson;
 
 import DAO.DBOperation;
 import beans.ProductBean;
-//import beans.Books;
 import beans.PostBean;
 import beans.ProductsBean;
 //import beans.SearchBean;

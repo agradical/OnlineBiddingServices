@@ -38,7 +38,7 @@ public class DBOperation {
 	private static  String mysqlurl = "jdbc:mysql://localhost:3306/user_data", sqlcmd1, query1_md5;
 
 	private static final String mysqluser = "root";
-	private static final String mysqlpassword = "Tiger";
+	private static final String mysqlpassword = "admin";
 	
 	private static final String sqlcmd0="USE user_data;";	// use the database statement
 	
@@ -677,7 +677,6 @@ public class DBOperation {
 		ArrayList<ArrayList<String>> searchResult = null;
 
 		Connection conn = null;
-		// query book information statement
 		String sqlcmd1 = "SELECT * FROM user_data.bid WHERE Bidder_Id LIKE'" + title + "';";
 
 		try {
@@ -760,48 +759,6 @@ public class DBOperation {
 		return searchResult;
 	}
 
-/*
-	public static ArrayList<ArrayList<String>> viewCart(String title) {
-			ArrayList<ArrayList<String>> searchResult = null;
-
-			Connection conn = null;
-			// query book information statement
-			String sqlcmd1 = "SELECT * FROM user_data.shoppingcart WHERE Post_User_Id='" + title + "';";
-
-			try {
-				// connect to database
-				Class.forName("com.mysql.jdbc.Driver");
-				conn = DriverManager.getConnection(mysqlurl, mysqluser, mysqlpassword);
-				Statement stmt1 = conn.createStatement();
-
-				stmt1.executeQuery(sqlcmd0);	// use the database
-				ResultSet result1 = stmt1.executeQuery(sqlcmd1);	// get the result
-				System.out.println("The sql statement is " + sqlcmd1);
-
-				searchResult = new ArrayList<ArrayList<String>>();
-				while (result1.next()) {
-					ArrayList<String> currProduct = new ArrayList<String>();
-					currProduct.add(result1.getString("Prod_Name"));
-					currProduct.add(result1.getString("Act_Price"));
-					currProduct.add(result1.getString("Bidder_Email"));
-					currProduct.add(result1.getString("Post_Email"));
-					currProduct.add(result1.getString("Item_Count"));
-					currProduct.add(result1.getString("Prod_Id"));
-					currProduct.add(result1.getString("Bidder_Id"));
-					//currProduct.add(result1.getString("P_Image"));
-					searchResult.add(currProduct);
-				}
-				System.out.println("The search result is got successfully.");
-
-				result1.close();
-				conn.close();
-			} catch (Exception e) {
-				System.out.println("Error occurred during communicating with database.");
-				e.printStackTrace();
-			}
-
-			return searchResult;
-		}*/
 
 	public static ArrayList<ArrayList<String>> searchProductsByTitle(String title) {
 		
