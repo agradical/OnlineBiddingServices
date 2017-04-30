@@ -1,7 +1,5 @@
 package services;
 
-import java.sql.SQLException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -33,7 +31,7 @@ public class SignUpServices {
 		Gson gson = new Gson();
 		User user = gson.fromJson(data, User.class);
 		
-		String username = user.getUserName();
+		String username = user.getUsername();
 		String password = user.getPassword();
 		
 		String firstName = user.getFirstName();
@@ -42,7 +40,7 @@ public class SignUpServices {
 		String emailAddress = user.getEmail();
 		String phone = user.getPhone();
 		String gender = user.getGender();
-		String dateofbirth = user.getDateOfBirth();
+		String dateofbirth = user.getDateofbirth();
 
 		String address1 = user.getAddress1();
 		String address2 = user.getAddress2();

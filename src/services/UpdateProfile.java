@@ -28,7 +28,7 @@ public class UpdateProfile {
 		Gson gson = new Gson();
 		User user = gson.fromJson(data, User.class);
 		
-		String username = user.getUserName();
+		String username = user.getUsername();
 		String password = user.getPassword();
 		String firstName = user.getFirstName();
 		String lastName = user.getLastName();
@@ -40,7 +40,7 @@ public class UpdateProfile {
 		String state = user.getState();
 		String gender = user.getGender();
 		String country = user.getCountry();
-		String dateofbirth = user.getDateOfBirth();
+		String dateofbirth = user.getDateofbirth();
 		
 		UserDao dao = new UserDao();
 		update = dao.updateUser(username, password, firstName, lastName, emailAddress, address1,address2,city,state,country,dateofbirth, phone, gender);

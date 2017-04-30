@@ -147,7 +147,7 @@ public class UserDao {
 				result.getString("Email_Id");
 				break;
 			}
-			user.setUserName(username);
+			user.setUsername(username);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

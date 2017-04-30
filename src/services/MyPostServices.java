@@ -31,7 +31,7 @@ public class MyPostServices {
 		Gson gson = new Gson();
 		User user = gson.fromJson(data, User.class);
 			
-		String username = user.getUserName();
+		String username = user.getUsername();
 		ProductsDao dao = new ProductsDao();
 		Products products = dao.getProductsByUser(username);
 	
