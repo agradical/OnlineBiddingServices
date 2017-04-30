@@ -3,7 +3,7 @@ package beans;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class UserBean {
+public class User {
 	
 	private String username;
 	private String password;
@@ -20,13 +20,12 @@ public class UserBean {
 	private String lastLoginLocation;
 	private boolean isValidUser;
 	private boolean isLoggedIn;
-	private CartBean cart;
 	private String address2;
 	private String city;
 	private String country;
 	private String dateofbirth;
 	
-	public UserBean(){
+	public User(){
 		username="";
 		password="";
 		firstName="";
@@ -40,7 +39,6 @@ public class UserBean {
 		lastLogin = "";
 		loginAttempts =0;
 		lastLoginLocation="";
-		cart = new CartBean();
 		isLoggedIn = false;
 		isValidUser = false;
 		address2="";
@@ -233,64 +231,5 @@ public class UserBean {
 		return isLoggedIn;
 	}
 	
-	public void deleteCartItem(String strItemIndex)
-	{
-		cart.deleteCartItem(strItemIndex);
-	}
 	
-	public void updateCartItem(String strItemIndex, String strQuantity)
-	{
-		System.out.println("inside user update cart");
-		cart.updateCartItem(strItemIndex, strQuantity);
-	}
-	
-	 public void addCartItem(String author, String title, String strUnitCost, String strQuantity, String isbn) 
-	 {
-		 cart.addCartItem(author, title, strUnitCost, strQuantity, isbn);
-	 }
-	 
-	 public void addCartItem(CartItemBean cartItem) 
-	 {
-		 cart.addCartItem(cartItem);
-	 }
-	 
-	 public CartItemBean getCartItem(int iItemIndex) 
-	 {
-		return cart.getCartItem(iItemIndex);
-	 }
-	 
-	 public ArrayList getCartItems()
-	 {
-		 return cart.getCartItems();
-	 }
-	 
-	 public void setCartItems(ArrayList alCartItems)
-	 {
-		 cart.setCartItems(alCartItems);
-	 }
-	 
-	 public double getOrderTotal()
-	 {
-		 return cart.getOrderTotal();
-	 }
-	 
-	 public int getLineItemCount()
-	 {
-		 return cart.getLineItemCount();
-	 }
-	 
-	 public void setOrderTotal(double dblOrderTotal)
-	 {
-		 cart.setOrderTotal(dblOrderTotal);
-	 }
-	 
-	 protected void calculateOrderTotal()
-	 {
-		 cart.calculateOrderTotal();
-	 }
-	 
-	 protected void initCart()
-	 {
-		 
-	 }
 }

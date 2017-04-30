@@ -13,9 +13,7 @@ import javax.ws.rs.core.Response;
 
 import com.google.gson.Gson;
 
-import DAO.DBOperation;
-import beans.RegisterBidBean;
-import beans.RegisterBidsBean;
+import beans.User;
 
 @Path("/emailservice")
 public class EmailService {
@@ -25,108 +23,102 @@ public class EmailService {
 	@Consumes("application/json")
     @Produces(MediaType.APPLICATION_JSON)
 	public Response addNewUser(String data) {
-		boolean response = false;
-		//ArrayList<ArrayList<String>> isAddNewUserSuccessful = true; //should be set to false
-		Gson gson = new Gson();
-		RegisterBidBean user = gson.fromJson(data, RegisterBidBean.class);
-		RegisterBidsBean products= new RegisterBidsBean();
-		String itemId = user.getItemID();
-		String itemName = user.getItemName();
-		String itemPrice = user.getActPrice();
-		String bidderId = user.getBidderId();
-		String postUserId = user.getPostUserID();
-		String postUserEmail = user.getPostUserEmail();
-		String bidUserEmail = user.getBidUserEmail();
-		String itemCount = user.getItemCount();
-		
-		System.out.println("this is the email address entered are: " + postUserEmail + " " + bidUserEmail );
-		//DBOperation dao = new DBOperation();
-		System.out.println(bidderId);
-		System.out.println(postUserId);
-		ArrayList<ArrayList<String>> isAddNewUserSuccessful = DBOperation.emailCart(itemId, itemName, itemPrice, bidderId, postUserId, postUserEmail,bidUserEmail,itemCount);
-		System.out.println("isPlaceOrderSuccessful results: " + isAddNewUserSuccessful);
-		
-		//sql code to add userInformation to database goes here
-		
-
-		if(isAddNewUserSuccessful != null){
-			response = true;
-			//search.setsearchResult(searchResult);
-			products.setValidationSearch(response);
-			
-			Email email = new Email();
-			email.setEmailTo(bidUserEmail);
-			email.setEmailFrom("bid@auctionware.com");
-			email.setHost("smtp.gmail.com");
-			email.setProperties();
-			email.setSession();
-			// debug code -> 
-			System.out.println(bidUserEmail);
-			
-			
-			//default message for now
-			String subject = "Order Confirmation";
-			String msg = "Congratulations " + postUserId + " your product has been bought by " + bidderId +
-						"\n\nYou will receive the payment and shipping details soon !!!";
-			
-			email.sendEmail(subject, msg); 
-			Email email2 = new Email();
-			email2.setEmailTo(postUserEmail);
-			email2.setEmailFrom("onlinebiddingrad@gmail.com");
-			email2.setHost("smtp.gmail.com");
-			email2.setProperties();
-			email2.setSession();
-			// debug code -> System.out.println(emailAddress);
-			System.out.println(postUserEmail);
-			
-			//default message for now
-			String subject1 = "Order Confirmation";
-			String msg1 = "Congratulations " + bidderId + " you've have purchased a product from " + postUserId +
-						"\n\nWe have received the payment and will ship items soon !!!";
-			
-			email2.sendEmail(subject1, msg1); 
-			
-			for(int index=0;index < isAddNewUserSuccessful.size();index++)
-			{
-				RegisterBidBean product = new RegisterBidBean();
-				product.setItemName(isAddNewUserSuccessful.get(index).get(0));
-				product.setActPrice(isAddNewUserSuccessful.get(index).get(1));
-				product.setBidUserEmail(isAddNewUserSuccessful.get(index).get(2));
-				product.setPostUserEmail(isAddNewUserSuccessful.get(index).get(3));
-				product.setItemCount(isAddNewUserSuccessful.get(index).get(4));
-				product.setItemID(isAddNewUserSuccessful.get(index).get(5));
-				//product.setImage(searchResult.get(index).get(12));
-				
-				products.addProducts(product);
-				
-				//System.out.println("cart bis is : " + product.getItemName());
-				
-				//System.out.println(searchResult.get(index).get(0));
-		
-			}
-			
-			
-		}
-		else
-		{
-			response = false;
-			//search.setValidation(response);
-			
-		}
-		//System.out.println("value of string is: " + String.valueOf(response));
-		//return Response.ok().entity(String.valueOf(response)).build();
-		
-		Gson searchResultJson = new Gson();
-		String responseData = searchResultJson.toJson(products);
-		//System.out.println("value of string is: " + responseData);
-		return Response.ok().entity(responseData).build();
-	}
-	
-	@Path("/availableusername/{username}")
-	@GET
-	public String availableUsername(@PathParam("username") String username) {
-		//code here to see if userName exists		
-		return username + "001";
+		return null;
+//		boolean response = false;
+//		//ArrayList<ArrayList<String>> isAddNewUserSuccessful = true; //should be set to false
+//		Gson gson = new Gson();
+//		User user = gson.fromJson(data, User.class);
+//		RegisterBidsBean products= new RegisterBidsBean();
+//		String itemId = user.getItemID();
+//		String itemName = user.getItemName();
+//		String itemPrice = user.getActPrice();
+//		String bidderId = user.getBidderId();
+//		String postUserId = user.getPostUserID();
+//		String postUserEmail = user.getPostUserEmail();
+//		String bidUserEmail = user.getBidUserEmail();
+//		String itemCount = user.getItemCount();
+//		
+//		System.out.println("this is the email address entered are: " + postUserEmail + " " + bidUserEmail );
+//		//DBOperation dao = new DBOperation();
+//		System.out.println(bidderId);
+//		System.out.println(postUserId);
+//		ArrayList<ArrayList<String>> isAddNewUserSuccessful = DBOperation.emailCart(itemId, itemName, itemPrice, bidderId, postUserId, postUserEmail,bidUserEmail,itemCount);
+//		System.out.println("isPlaceOrderSuccessful results: " + isAddNewUserSuccessful);
+//		
+//		//sql code to add userInformation to database goes here
+//		
+//
+//		if(isAddNewUserSuccessful != null){
+//			response = true;
+//			//search.setsearchResult(searchResult);
+//			products.setValidationSearch(response);
+//			
+//			Email email = new Email();
+//			email.setEmailTo(bidUserEmail);
+//			email.setEmailFrom("bid@auctionware.com");
+//			email.setHost("smtp.gmail.com");
+//			email.setProperties();
+//			email.setSession();
+//			// debug code -> 
+//			System.out.println(bidUserEmail);
+//			
+//			
+//			//default message for now
+//			String subject = "Order Confirmation";
+//			String msg = "Congratulations " + postUserId + " your product has been bought by " + bidderId +
+//						"\n\nYou will receive the payment and shipping details soon !!!";
+//			
+//			email.sendEmail(subject, msg); 
+//			Email email2 = new Email();
+//			email2.setEmailTo(postUserEmail);
+//			email2.setEmailFrom("onlinebiddingrad@gmail.com");
+//			email2.setHost("smtp.gmail.com");
+//			email2.setProperties();
+//			email2.setSession();
+//			// debug code -> System.out.println(emailAddress);
+//			System.out.println(postUserEmail);
+//			
+//			//default message for now
+//			String subject1 = "Order Confirmation";
+//			String msg1 = "Congratulations " + bidderId + " you've have purchased a product from " + postUserId +
+//						"\n\nWe have received the payment and will ship items soon !!!";
+//			
+//			email2.sendEmail(subject1, msg1); 
+//			
+//			for(int index=0;index < isAddNewUserSuccessful.size();index++)
+//			{
+//				RegisterBidBean product = new RegisterBidBean();
+//				product.setItemName(isAddNewUserSuccessful.get(index).get(0));
+//				product.setActPrice(isAddNewUserSuccessful.get(index).get(1));
+//				product.setBidUserEmail(isAddNewUserSuccessful.get(index).get(2));
+//				product.setPostUserEmail(isAddNewUserSuccessful.get(index).get(3));
+//				product.setItemCount(isAddNewUserSuccessful.get(index).get(4));
+//				product.setItemID(isAddNewUserSuccessful.get(index).get(5));
+//				//product.setImage(searchResult.get(index).get(12));
+//				
+//				products.addProducts(product);
+//				
+//				//System.out.println("cart bis is : " + product.getItemName());
+//				
+//				//System.out.println(searchResult.get(index).get(0));
+//		
+//			}
+//			
+//			
+//		}
+//		else
+//		{
+//			response = false;
+//			//search.setValidation(response);
+//			
+//		}
+//		//System.out.println("value of string is: " + String.valueOf(response));
+//		//return Response.ok().entity(String.valueOf(response)).build();
+//		
+//		Gson searchResultJson = new Gson();
+//		String responseData = searchResultJson.toJson(products);
+//		//System.out.println("value of string is: " + responseData);
+//		return Response.ok().entity(responseData).build();
 	}
 
 }

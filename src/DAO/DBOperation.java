@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -25,6 +26,11 @@ import org.json.simple.JSONObject;
 
 import com.sun.rowset.CachedRowSetImpl;
 
+import beans.Bid;
+import beans.Bids;
+import beans.Product;
+import beans.Products;
+import beans.User;
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.BinaryConnectionFactory;
 //Spymemcached
@@ -84,18 +90,8 @@ public class DBOperation {
 		}
 		return false;
 	}
-	
-	/**
-	 * process the user login
-	 * @param username
-	 * @param password
-	 * @return
-	 * @throws IOException 
-	 * @throws SQLException 
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
-	 */
-	public boolean userLogin(String username, String password, String location) throws IOException, SQLException, InterruptedException, ExecutionException {
+
+	public boolean userLogin(String username, String password) throws IOException, SQLException, InterruptedException, ExecutionException {
 		boolean result = false;
 		Connection conn = null;
 		
@@ -146,14 +142,7 @@ public class DBOperation {
 					if (crsi.getString("Pass").equals(password)) {	// valid login
 						result = true;
 						// update Last_login
-						SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-						String Last_login = dateFormat.format(new Date());
-						System.out.println(location);
-				          String sqlcmd2 = "UPDATE users SET Last_login='" + Last_login + "',Last_login_location='" + location + "' WHERE Username ='" + username + "';";
-				          stmt1.executeUpdate(sqlcmd2);
-						stmt1.executeUpdate(sqlcmd2);
-						System.out.println("The sql statement is " + sqlcmd2);
-						System.out.println("This is a valid login.");
+						
 					} else {	// failed login: wrong password
 						result = false;
 						int failedLoginNum = Integer.parseInt(crsi.getString("No_failed_login"));
@@ -210,97 +199,46 @@ public class DBOperation {
 		
 	}
 
-	@SuppressWarnings("unchecked")
-	public JSONObject getProfile(String username) {
+	public User getUser(String username) {
 		
 		logger.info("DATABASE: Getting profile for username: "+username);
-		
-		JSONObject resultJSON = new JSONObject();
+		User user = new User();
 		
 		Connection conn = null;
-		// query user information statement
 		String sqlcmd1 = "SELECT * FROM user_data.users WHERE Username='" + username + "';";
 
 		try {
-			// connect to database
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(mysqlurl, mysqluser, mysqlpassword);
-			Statement stmt1 = conn.createStatement();
+			Statement stmt = conn.createStatement();
 
-			stmt1.executeQuery(sqlcmd0);	// use the database
-			ResultSet result1 = stmt1.executeQuery(sqlcmd1);	// get the result
+			stmt.executeQuery(sqlcmd0);
+			ResultSet result = stmt.executeQuery(sqlcmd1);
 
-			System.out.println("getting user information...");
-			System.out.println("The sql statement is " + sqlcmd1);
-
-			// convert the ResultSet to JSON
-			JSONArray rows = new JSONArray();
-			int colNum = result1.getMetaData().getColumnCount();
-			while (result1.next()) {// for all rows
-				JSONObject currRow = new JSONObject();
-				for (int i = 1; i <= colNum; i++) { // for 1 row
-					currRow.put(result1.getMetaData().getColumnLabel(i), result1.getString(i));
-	            }
-				rows.add(currRow);
+			while (result.next()) {
+				result.getString("Email_Id");
+				break;
 			}
-			resultJSON.put("result", rows);// result has all rows
-
-			result1.close();
+			result.close();
 			conn.close();
 		} catch (Exception e) {
-			System.out.println("Error occurred during communicating with database.");
 			e.printStackTrace();
 		}
-
-		return resultJSON;
+		user.setUserName(username);
+		return user;
 	}
 
-	/*public static boolean AddBidToCart(String bidID, String itemName, String postUserEmail, 
-			 								String bidUserEmail, String itemID, String bidderId, String postUserID, 
-			 								String expDesc, String expQuality, String expPrice, String actDesc, 
-			 								String actQuality, String actPrice) {
-		
-		logger.info("DATABASE: Adding bid: "+bidID+" :to cart ");
-		
-	 	boolean result = false;
-		Connection conn = null;
-
-		// query statement
-		String sqlcmd1 = "INSERT INTO shoppingcart VALUES (" + null + ",'" + bidID + "','" + itemID + "','" + itemName + "','" + bidderId + "','" + postUserID + "','" + expDesc + "','" + expQuality + "','" + expPrice + "','" + actDesc + "','" + actQuality + "','" + actPrice + "','" + 1 + "','" + bidUserEmail + "','" + postUserEmail + "');";
-
-		System.out.println("sql cmd: "+ sqlcmd1);
-		try {
-			// connect to database
-			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection(mysqlurl, mysqluser, mysqlpassword);
-			Statement stmt1 = conn.createStatement();
-
-			stmt1.executeQuery(sqlcmd0);	// use the database
-			stmt1.executeUpdate(sqlcmd1);
-			result = true;
-			System.out.println("The sql statement is " + sqlcmd1);
-			System.out.println("The new bid is inserted successfully.");
-
-			conn.close();
-		} catch (Exception e) {
-			System.out.println("Error occurred during communicating with database.");
-			e.printStackTrace();
-		}
-
-		return result;
-	}*/
-	
-	public static boolean prodBid(String itemName, String postUserEmail, String bidUserEmail, 
-										String itemID, String bidderId, String postUserID, String expDesc,
-										String expQuality,String expPrice, String actDesc, String actQuality,  String actPrice){
+	public static boolean postBid(String itemName, String postUserEmail, String bidUserEmail, 
+										String itemID, String bidderId, String postUserID, String actPrice){
 		
 		logger.info("DATABASE: Creating new bid for "+itemName);
 		
 		boolean result = false;
 		Connection conn = null;
 
-		// query statement
-		String sqlcmd1 = "INSERT INTO bid VALUES (" + null + ",'" + itemID + "','" + bidderId + "','" + postUserID + "','" + expDesc + "','" + expQuality + "','" + expPrice + "','" + actDesc + "','" + actQuality + "','" + actPrice + "','" + itemName + "','" + postUserEmail + "','" + bidUserEmail + "');";
+		String sqlcmd1 = "INSERT INTO bid (Prod_Id, Bidder_Id, Post_User_Id, Act_Price, Prod_Name, Post_Email, Bidder_Email) "
+								+ "VALUES ('"+itemID + "','"+ bidderId + "','" + postUserID + "','" 
+								+ actPrice + "','" + itemName + "','"+ postUserEmail + "','" + bidUserEmail + "');";
 
 		System.out.println("sql cmd: "+ sqlcmd1);
 		try {
@@ -312,7 +250,6 @@ public class DBOperation {
 			stmt1.executeQuery(sqlcmd0);	// use the database
 			stmt1.executeUpdate(sqlcmd1);
 			result = true;
-			System.out.println("The sql statement is " + sqlcmd1);
 			System.out.println("The new bid is inserted successfully.");
 
 			conn.close();
@@ -516,63 +453,59 @@ public class DBOperation {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static ArrayList<ArrayList<String>> searchBid(String title) {
-
-		logger.info("DATABASE: Search for products: "+title);
+	public static ArrayList<ArrayList<String>> getAllProducts() {
 
 		ArrayList<ArrayList<String>> searchResult = null;
 
 		Connection conn = null;
 		
-		String sqlcmd2 = "SELECT Post_User_Id, Prod_Id, Prod_Name, P_Price, P_Description, P_Category, P_Quality, P_Address_Line1, P_Address_Line2, P_City, P_State, P_Country FROM user_data.product,users;";
-		String sqlcmd1 = "SELECT Email_Id,Post_User_Id, Prod_Id, Prod_Name, P_Price, P_Description, P_Category, P_Quality, P_Address_Line1, P_Address_Line2, P_City, P_State, P_Country FROM user_data.product,user_data.users WHERE Post_User_Id=Username;";
+		String sqlcmd1 = "SELECT Email_Id,Post_User_Id, Prod_Id, Prod_Name, P_Price,"
+				+ " P_Description, P_Category, P_Quality, P_Address_Line1, P_Address_Line2,"
+				+ " P_City, P_State, P_Country"
+				+ " FROM user_data.product,user_data.users"
+				+ " WHERE Post_User_Id=Username;";
 		try {
-			// connect to database
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(mysqlurl, mysqluser, mysqlpassword);
 			Statement stmt1 = conn.createStatement();
 
-			stmt1.executeQuery(sqlcmd0);	// use the database
-			ResultSet result1 = stmt1.executeQuery(sqlcmd1);	// get the result
-			System.out.println("The sql statement is " + sqlcmd1);
+			stmt1.executeQuery(sqlcmd0);
+			ResultSet result = stmt1.executeQuery(sqlcmd1);
 
 			searchResult = new ArrayList<ArrayList<String>>();
-			while (result1.next()) {
+			while (result.next()) {
 				ArrayList<String> currProduct = new ArrayList<String>();
 
-				currProduct.add(result1.getString("Post_User_Id"));
-				currProduct.add(result1.getString("Prod_Id"));
-				currProduct.add(result1.getString("Prod_Name"));
-				currProduct.add(result1.getString("P_Price"));
-				currProduct.add(result1.getString("P_Description"));
-				currProduct.add(result1.getString("P_Category"));
-				currProduct.add(result1.getString("P_Quality"));
-				currProduct.add(result1.getString("P_Address_Line1"));
-				currProduct.add(result1.getString("P_Address_Line2"));
-				currProduct.add(result1.getString("P_City"));
-				currProduct.add(result1.getString("P_State"));
-				currProduct.add(result1.getString("P_Country"));
-				currProduct.add(result1.getString("Email_Id"));
+				currProduct.add(result.getString("Post_User_Id"));
+				currProduct.add(result.getString("Prod_Id"));
+				currProduct.add(result.getString("Prod_Name"));
+				currProduct.add(result.getString("P_Price"));
+				currProduct.add(result.getString("P_Description"));
+				currProduct.add(result.getString("P_Category"));
+				currProduct.add(result.getString("P_Quality"));
+				currProduct.add(result.getString("P_Address_Line1"));
+				currProduct.add(result.getString("P_Address_Line2"));
+				currProduct.add(result.getString("P_City"));
+				currProduct.add(result.getString("P_State"));
+				currProduct.add(result.getString("P_Country"));
+				currProduct.add(result.getString("Email_Id"));
 				searchResult.add(currProduct);
 
 			}
-			System.out.println("The search product result is got successfully.");
-
-			result1.close();
+			result.close();
 			conn.close();
 		} catch (Exception e) {
-			System.out.println("Error occurred during communicating with database.");
 			e.printStackTrace();
 		}
 
 		return searchResult;
 	}
 	
-	public static ArrayList<ArrayList<String>> searchPostBidsByTitle(String title) {
+	public static Bids searchPostedBidsOnItem(String title) {
 		
 		logger.info("DATABASE: Search My products: "+title);
 		
-		ArrayList<ArrayList<String>> searchResult = null;
+		Bids bids = new Bids();
 
 		Connection conn = null;
 		
@@ -581,92 +514,85 @@ public class DBOperation {
 			// connect to database
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(mysqlurl, mysqluser, mysqlpassword);
-			Statement stmt1 = conn.createStatement();
+			Statement stmt = conn.createStatement();
 
-			stmt1.executeQuery(sqlcmd0);	// use the database
-			ResultSet result1 = stmt1.executeQuery(sqlcmd1);	// get the result
-			System.out.println("The sql statement is " + sqlcmd1);
+			stmt.executeQuery(sqlcmd0);
+			ResultSet result = stmt.executeQuery(sqlcmd1);
 
-			searchResult = new ArrayList<ArrayList<String>>();
-			while (result1.next()) {
-				ArrayList<String> currProduct = new ArrayList<String>();
-				currProduct.add(result1.getString("Bid_Id"));
-				currProduct.add(result1.getString("Prod_Id"));
-				currProduct.add(result1.getString("Bidder_Id"));
-				currProduct.add(result1.getString("Post_User_Id"));
-				currProduct.add(result1.getString("Exp_Description"));
-				currProduct.add(result1.getString("Exp_Quality"));
-				currProduct.add(result1.getString("Exp_Price"));
-				currProduct.add(result1.getString("Act_Description"));
-				currProduct.add(result1.getString("Act_Quality"));
-				currProduct.add(result1.getString("Act_Price"));
-				currProduct.add(result1.getString("Prod_Name"));
-				currProduct.add(result1.getString("Post_Email"));
-				currProduct.add(result1.getString("Bidder_Email"));
+			while (result.next()) {
+				Bid b = new Bid();
 				
-				searchResult.add(currProduct);
+				b.setId(result.getString("Bid_Id"));
+				b.setItemId(result.getString("Prod_Id"));
+				b.setUsername(result.getString("Bidder_Id"));
+				b.setSellerName(result.getString("Post_User_Id"));
+				b.setPrice(result.getString("Act_Price"));
+				b.setBuyerEmail(result.getString("Bidder_Email"));
+				b.setSellerEmail(result.getString("Post_Email"));
+				
+				bids.addBids(b);
 			}
 			System.out.println("The search product result is got successfully.");
-
-			result1.close();
+			result.close();
 			conn.close();
 		} catch (Exception e) {
 			System.out.println("Error occurred during communicating with database.");
 			e.printStackTrace();
 		}
 
-		return searchResult;
+		return bids;
 	}
 
 
 	@SuppressWarnings("unchecked")
-	public static ArrayList<ArrayList<String>> viewProductByTitle(String title) {
-		logger.info("DATABASE: View for products: "+title);
-		
-		ArrayList<ArrayList<String>> viewResult = null;
+	public static Products getProductsByUser(String username) {
+		Products products = new Products();
 
 		Connection conn = null;
 		
-		String sqlcmd1 = "SELECT Prod_Id, Prod_Name, P_Price, P_Description, P_Category, P_Quality, P_Address_Line1, P_Address_Line2, P_City, P_State, P_Country,Email_Id  FROM user_data.product,users WHERE Post_User_Id ='" + title + "' AND Post_User_Id= Username;" ;
+		String sqlcmd1 = "SELECT Prod_Id, Prod_Name, P_Price, P_Description,"
+				+ " P_Category, P_Quality, P_Address_Line1, P_Address_Line2, "
+				+ "P_City, P_State, P_Country,Email_Id  "
+				+ "FROM user_data.product,users "
+				+ "WHERE Post_User_Id ='" + username + "' AND Post_User_Id= Username;" ;
 		try {
 			// connect to database
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(mysqlurl, mysqluser, mysqlpassword);
-			Statement stmt1 = conn.createStatement();
+			Statement stmt = conn.createStatement();
 
-			stmt1.executeQuery(sqlcmd0);	// use the database
-			ResultSet result1 = stmt1.executeQuery(sqlcmd1);	// get the result
+			stmt.executeQuery(sqlcmd0);	// use the database
+			ResultSet result = stmt.executeQuery(sqlcmd1);	// get the result
 			System.out.println("The sql statement is " + sqlcmd1);
 
-			viewResult = new ArrayList<ArrayList<String>>();
-			while (result1.next()) {
-				ArrayList<String> currProduct = new ArrayList<String>();
-				currProduct.add(result1.getString("Prod_Id"));
-				currProduct.add(result1.getString("Prod_Name"));
-				currProduct.add(result1.getString("P_Price"));
-				currProduct.add(result1.getString("P_Description"));
-				currProduct.add(result1.getString("P_Category"));
-				currProduct.add(result1.getString("P_Quality"));
-				currProduct.add(result1.getString("P_Address_Line1"));
-				currProduct.add(result1.getString("P_Address_Line2"));
-				currProduct.add(result1.getString("P_City"));
-				currProduct.add(result1.getString("P_State"));
-				currProduct.add(result1.getString("P_Country"));
-				currProduct.add(result1.getString("Email_Id"));
+			while (result.next()) {
 
-				viewResult.add(currProduct);
+				Product p = new Product();
+				
+				p.setId(result.getString("Prod_Id"));
+				p.setName(result.getString("Prod_Name"));
+				p.setPrice(result.getString("P_Price"));
+				p.setDescription(result.getString("P_Description"));
+				p.setCategory(result.getString("P_Category"));
+				p.setQuality(result.getString("P_Quality"));
+				p.setAddress1(result.getString("P_Address_Line1"));
+				p.setAddress2(result.getString("P_Address_Line2"));
+				p.setCity(result.getString("P_City"));
+				p.setState(result.getString("P_State"));
+				p.setCountry(result.getString("P_Country"));
+				p.setEmailId(result.getString("Email_Id"));
+				
+				products.addProducts(p);
 
 			}
-			System.out.println("The search product result is got successfully.");
-
-			result1.close();
+			result.close();
 			conn.close();
 		} catch (Exception e) {
 			System.out.println("Error occurred during communicating with database.");
 			e.printStackTrace();
 		}
 
-		return viewResult;
+		return products;
 	}
 
 	public static ArrayList<ArrayList<String>> searchBiddersByTitle(String title) {
@@ -716,58 +642,38 @@ public class DBOperation {
 		return searchResult;
 	}
 	
-	public static ArrayList<ArrayList<String>> deleteItem(String title, String username) {
-		ArrayList<ArrayList<String>> searchResult = null;
+	public static boolean deleteItem(String itemid, String username) {
 
 		Connection conn = null;
-		String sqlcmd1 = "DELETE FROM user_data.product WHERE Prod_Name='" + title + "' AND Post_User_Id='" + username + "';";
-		String sqlcmd2 = "SELECT * FROM user_data.product WHERE Post_User_Id='" + username + "';";
-
+		String sqlcmd1 = "DELETE FROM user_data.product "
+								+ "WHERE Prod_Id='" + itemid + "' AND Post_User_Id='" + username + "';";
+		
 		try {
 			// connect to database
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(mysqlurl, mysqluser, mysqlpassword);
-			Statement stmt1 = conn.createStatement();
+			Statement stmt = conn.createStatement();
 
-			stmt1.executeQuery(sqlcmd0);
-			stmt1.executeUpdate(sqlcmd1);// use the database
-			ResultSet result1 = stmt1.executeQuery(sqlcmd2);	// get the result
-			System.out.println("The sql statement 1 is " + sqlcmd1);
-			System.out.println("The sql statement 2 is " + sqlcmd2);
+			stmt.executeQuery(sqlcmd0);
+			stmt.executeUpdate(sqlcmd1);// use the database
 
-			searchResult = new ArrayList<ArrayList<String>>();
-			while (result1.next()) {
-				ArrayList<String> currProduct = new ArrayList<String>();
-				currProduct.add(result1.getString("Post_User_Id"));
-				currProduct.add(result1.getString("Prod_Name"));
-				currProduct.add(result1.getString("P_Price"));
-				currProduct.add(result1.getString("P_Description"));
-				currProduct.add(result1.getString("P_Category"));
-
-				//currProduct.add(result1.getString("P_Image"));
-				searchResult.add(currProduct);
-			}
-			System.out.println("The search result is got successfully.");
-
-			result1.close();
 			conn.close();
 		} catch (Exception e) {
 			System.out.println("Error occurred during communicating with database.");
 			e.printStackTrace();
 		}
-
-		return searchResult;
+		return true;
 	}
 
 
-	public static ArrayList<ArrayList<String>> searchProductsByTitle(String title) {
+	public static ArrayList<ArrayList<String>> searchProducts(String text) {
 		
-		logger.info("DATABASE: Search for products1: "+title);
+		logger.info("DATABASE: Search for products1: "+text);
 		//JSONObject resultJSON = new JSONObject();
 		ArrayList<ArrayList<String>> searchResult = null;
 
 		Connection conn = null;
-		String sqlcmd1 = "SELECT * FROM user_data.product,users WHERE Prod_Name LIKE '" + title + "' AND Post_User_Id = Username;";
+		String sqlcmd1 = "SELECT * FROM user_data.product,users WHERE Prod_Name LIKE '%" + text + "%' AND Post_User_Id = Username;";
 
 		try {
 			// connect to database
