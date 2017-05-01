@@ -12,6 +12,9 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 import DAO.UserDao;
 import beans.User;
@@ -21,12 +24,57 @@ public class SignUpServices {
 	
 	final static Logger logger = Logger.getLogger(SignUpServices.class);
 	
+	@Path("/newusermicro")
+	@POST
+	@Consumes("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
+	public Response addNewUserMicro(String data) {
+		
+		Gson gson = new Gson();
+		User user = gson.fromJson(data, User.class);
+		
+		String username = user.getUsername();
+
+		Client client = Client.create();
+		WebResource webResource = client.resource("http://localhost:9090/OnlineBiddingMicroServices/rest/signupmicroservices/usernameavailability/"+username);
+		ClientResponse restResponse = webResource
+				.type(MediaType.APPLICATION_JSON)
+				.get(ClientResponse.class);
+		
+		if (restResponse.getStatus() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : " + restResponse.getStatus());
+		}
+
+		String statusString = restResponse.getEntity(String.class);
+		boolean isusernamepresent = Boolean.parseBoolean(statusString);
+		
+		if(!isusernamepresent) {
+			
+			webResource = client.resource("http://localhost:9090/OnlineBiddingMicroServices/rest/signupservices/newuser");
+			
+			Gson userJson = new Gson();
+			String user_data = userJson.toJson(user);
+
+			restResponse = webResource
+								.type(MediaType.APPLICATION_JSON)
+								.post(ClientResponse.class, user_data);
+			
+			if (restResponse.getStatus() != 200) {
+				throw new RuntimeException("Failed : HTTP error code : " + restResponse.getStatus());
+			}
+ 
+			statusString = restResponse.getEntity(String.class);
+			return Response.ok().entity(statusString).build();		
+		}
+		return Response.ok().entity(String.valueOf(false)).build();
+	}
+	
 	@Path("/newuser")
 	@POST
 	@Consumes("application/json")
     @Produces(MediaType.APPLICATION_JSON)
 	public Response addNewUser(String data) {
-		boolean success = false; //should be set to false
+		boolean success = false;
 		
 		Gson gson = new Gson();
 		User user = gson.fromJson(data, User.class);

@@ -12,8 +12,8 @@ public class Email
 	private String host;
 	private Properties properties;
 	private Session session;
-	private final String username = "onlinebiddingrad@gmail.com";
-	private final String password = "RADWPL2016";
+	private final String username = "notify@auctionware.com";
+	private final String password = "pass";
 	
 	public void setEmailTo(String to)
 	{
