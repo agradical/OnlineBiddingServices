@@ -13,10 +13,10 @@ import beans.Bids;
 public class BidsDao {
 	final static Logger logger = Logger.getLogger(BidsDao.class);
 
-	public boolean postBid(String itemName, String postUserEmail, String bidUserEmail, 
-		String itemID, String bidderId, String postUserID, String actPrice) {
+	public boolean postBid(String name, String userEmail, String bidderEmail, 
+		String productId, String bidderId, String userId, String price) {
 
-		logger.info("DATABASE: Creating new bid for "+itemName);
+		logger.info("DATABASE: Creating new bid for "+name);
 
 		boolean result = false;
 
@@ -24,9 +24,9 @@ public class BidsDao {
 			DB db = new DB();
 			Connection conn = db.getConnection();
 
-			String query = "INSERT INTO bid (Prod_Id, Bidder_Id, Post_User_Id, Act_Price, Prod_Name, Post_Email, Bidder_Email) "
-					+ "VALUES ('"+itemID + "','"+ bidderId + "','" + postUserID + "','" 
-					+ actPrice + "','" + itemName + "','"+ postUserEmail + "','" + bidUserEmail + "');";
+			String query = "INSERT INTO bid (product_id, bidder_id, user_id, price, name, user_email, bidder_email) "
+					+ "VALUES ('"+productId + "','"+ bidderId + "','" + userId + "','" 
+					+ price + "','" + name + "','"+ userEmail + "','" + bidderEmail + "');";
 
 			Statement stmt1 = conn.createStatement();
 
@@ -51,7 +51,7 @@ public class BidsDao {
 			DB db = new DB();
 			Connection conn = db.getConnection();
 
-			String sqlcmd1 = "SELECT * FROM user_data.bid WHERE Prod_Id ='" + title + "';";
+			String sqlcmd1 = "SELECT * FROM bid WHERE product_id ='" + title + "';";
 
 			Statement stmt = conn.createStatement();
 
@@ -60,13 +60,13 @@ public class BidsDao {
 			while (result.next()) {
 				Bid b = new Bid();
 
-				b.setId(result.getString("Bid_Id"));
-				b.setItemId(result.getString("Prod_Id"));
-				b.setUsername(result.getString("Bidder_Id"));
-				b.setSellerName(result.getString("Post_User_Id"));
-				b.setPrice(result.getString("Act_Price"));
-				b.setBuyerEmail(result.getString("Bidder_Email"));
-				b.setSellerEmail(result.getString("Post_Email"));
+				b.setId(result.getString("bid_id"));
+				b.setItemId(result.getString("product_id"));
+				b.setUsername(result.getString("bidder_id"));
+				b.setSellerName(result.getString("user_id"));
+				b.setPrice(result.getString("price"));
+				b.setBuyerEmail(result.getString("bidder_email"));
+				b.setSellerEmail(result.getString("user_email"));
 
 				bids.addBids(b);
 			}

@@ -29,21 +29,18 @@ public class UpdateProfile {
 		User user = gson.fromJson(data, User.class);
 		
 		String username = user.getUsername();
-		String password = user.getPassword();
-		String firstName = user.getFirstName();
-		String lastName = user.getLastName();
-		String emailAddress = user.getEmail();
-		String phone = user.getPhone();
+		
+		
 		String address1 = user.getAddress1();
 		String address2 = user.getAddress2();
 		String city = user.getCity();
 		String state = user.getState();
-		String gender = user.getGender();
 		String country = user.getCountry();
-		String dateofbirth = user.getDateofbirth();
 		
 		UserDao dao = new UserDao();
-		update = dao.updateUser(username, password, firstName, lastName, emailAddress, address1,address2,city,state,country,dateofbirth, phone, gender);
+		update = dao.updateUser(username, address1,address2,city,state,country);
+		user = dao.getUser(username);
+		
 		System.out.println("isUpdateUserSuccessful: " + update);	
 		
 		if(update){
@@ -52,7 +49,8 @@ public class UpdateProfile {
 		else{
 			logger.info("Update profile: "+username+" :FAIL");
 		}
-		return Response.ok().entity(String.valueOf(update)).build();
+		String response = gson.toJson(user);
+		return Response.ok().entity(String.valueOf(response)).build();
 	}
 
 }

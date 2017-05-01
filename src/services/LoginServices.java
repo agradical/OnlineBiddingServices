@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 
 import DAO.UserDao;
+import auth.AuthKey;
 import beans.User;
  
 @Path("/loginservices")
@@ -45,7 +46,6 @@ public class LoginServices {
 		UserDao dao = new UserDao();
 		boolean isValidUser = dao.userLogin(username, password);
 		User user = new User();
-		
 		if(isValidUser) {
 			user = dao.getUser(username);
 			logger.info("Login request:"+username+": SUCCESS");
@@ -53,9 +53,8 @@ public class LoginServices {
 		else {
 			logger.info("Login request:"+username+": FAIL");
 		}
-		
-		Gson userJson = new Gson();
-		String response = userJson.toJson(user);
+		Gson gson = new Gson();
+		String response = gson.toJson(user);
 		return Response.ok().entity(response).build();
 		
 	}

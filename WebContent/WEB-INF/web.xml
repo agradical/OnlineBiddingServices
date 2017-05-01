@@ -26,15 +26,15 @@
     <error-code>404</error-code>
     <location>/Error.jsp</location>
   </error-page>
-    <!-- security-constraint>
+    <!-- <security-constraint>
     <web-resource-collection>
       <web-resource-name>securedapp</web-resource-name>
-      <url-pattern>/rest/*</url-pattern>
+      <url-pattern>/*</url-pattern>
     </web-resource-collection>
     <user-data-constraint>
       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
-  </security-constraint-->
+  </security-constraint> -->
   <servlet>
     <servlet-name>SessionControllerServlet</servlet-name>
     <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>

@@ -26,23 +26,24 @@ public class AddProductServices {
 	public Response addProduct(String data) {
 		boolean success = false;
 		Gson gson = new Gson();
-		Product user = gson.fromJson(data, Product.class);
+		Product product = gson.fromJson(data, Product.class);
 		
-		String name = user.getName();
-		String price = user.getPrice();
-		String description = user.getDescription();
-		String category = user.getCategory();
-		String quality = user.getQuality();
-		String address1 = user.getAddress1();
-		String address2 = user.getAddress2();
-		String country = user.getCountry();
-		String state = user.getState();
-		String city = user.getCity();
-		String username = user.getUsername();
+		String name = product.getName();
+		String price = product.getPrice();
+		String description = product.getDescription();
+		String category = product.getCategory();
+		String quality = product.getQuality();
+		String address1 = product.getAddress1();
+		String address2 = product.getAddress2();
+		String country = product.getCountry();
+		String state = product.getState();
+		String city = product.getCity();
+		String username = product.getUsername();
+		String minutes = product.getMinutes();
 
 		ProductsDao dao = new ProductsDao();
 		success = dao.prodPost(username, name, price, description, category, 
-									quality, address1, address2, country, state,city);
+									quality, address1, address2, country, state,city,minutes);
 		
 		if(success){
 			logger.info("Bid posting for product: "+name+": SUCCESS");

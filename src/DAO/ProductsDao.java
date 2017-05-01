@@ -1,10 +1,10 @@
 package DAO;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 import org.apache.log4j.Logger;
@@ -16,9 +16,9 @@ import beans.Products;
 public class ProductsDao {
 	final static Logger logger = Logger.getLogger(ProductsDao.class);
 	
-	public boolean prodPost(String username, String itemName, String itemPrice,String itemDesc,
-			String itemCategory,String itemQuality,String add1, String add2,String country,
-			String state,String city) {
+	public boolean prodPost(String username, String name, String price,String description,
+			String category,String quality,String address1, String address2, String country,
+			String state,String city,String minutes_str) {
 
 		logger.info("DATABASE: Creating new sell post by: "+username);
 		
@@ -27,19 +27,27 @@ public class ProductsDao {
 		try {
 			DB db = new DB();
 			Connection conn =  db.getConnection();
-
-			SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+			
+			Integer minutes = Integer.parseInt(minutes_str);
+			
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Calendar calendar = Calendar.getInstance();
-			java.sql.Date ourJavaDateObject = new java.sql.Date(calendar.getTime().getTime());
-			calendar.add( Calendar.DATE, +3); 
-			String convertedDate=dateFormat.format(calendar.getTime()); 
-
+			
+			Date currdate = new Date(calendar.getTimeInMillis());
+			String date_str = dateFormat.format(currdate);
+			
+			long t = calendar.getTimeInMillis();
+			Date expiry = new Date(t + (minutes * 60000));
+			String expiry_date_str = dateFormat.format(expiry);
+			
+			
 			String query = "INSERT INTO product VALUES (" + null + ",'" + username + "','" 
-					+ itemName + "','" + itemPrice + "','" + itemDesc + "','" 
-					+ itemCategory + "','" + itemQuality + "','" + add1 + "','" 
-					+ add2 + "','" + city + "','" + state + "','" + country + "','" 
-					+ ourJavaDateObject + "','" + convertedDate +"');";
-
+					+ name + "','" + price + "','" + description + "','" 
+					+ category + "','" + quality + "','" + address1 + "','" 
+					+ address2 + "','" + city + "','" + state + "','" + country + "','" 
+					+ date_str + "','" + expiry_date_str +"');";
+			
+			System.out.println(query);
 			Statement stmt1 = conn.createStatement();
 
 			stmt1.executeUpdate(query);
@@ -51,43 +59,43 @@ public class ProductsDao {
 		return result;
 	}
 
-	public ArrayList<ArrayList<String>> getAllProducts() {
+	public Products getAllProducts() {
 
-		ArrayList<ArrayList<String>> searchResult = null;
-		
+		Products products = new Products();
 		try {
 			DB db = new DB();
 			Connection conn = db.getConnection();
 
-			String sqlcmd1 = "SELECT Email_Id,Post_User_Id, Prod_Id, Prod_Name, P_Price,"
-					+ " P_Description, P_Category, P_Quality, P_Address_Line1, P_Address_Line2,"
-					+ " P_City, P_State, P_Country"
-					+ " FROM user_data.product,user_data.users"
-					+ " WHERE Post_User_Id=Username;";
+			String query = "SELECT u.email, p.user_id, p.product_id, p.name, p.price,"
+					+ " p.description, p.category, p.quality, u.address1, u.address2,"
+					+ " u.city, u.state, u.country, p.bid_time, p.expirytime "
+					+ " FROM product p , users u"
+					+ " WHERE p.user_id=u.username;";
 
 			Statement stmt = conn.createStatement();
 
-			ResultSet result = stmt.executeQuery(sqlcmd1);
-
-			searchResult = new ArrayList<ArrayList<String>>();
+			ResultSet result = stmt.executeQuery(query);
 
 			while (result.next()) {
-				ArrayList<String> currProduct = new ArrayList<String>();
 
-				currProduct.add(result.getString("Post_User_Id"));
-				currProduct.add(result.getString("Prod_Id"));
-				currProduct.add(result.getString("Prod_Name"));
-				currProduct.add(result.getString("P_Price"));
-				currProduct.add(result.getString("P_Description"));
-				currProduct.add(result.getString("P_Category"));
-				currProduct.add(result.getString("P_Quality"));
-				currProduct.add(result.getString("P_Address_Line1"));
-				currProduct.add(result.getString("P_Address_Line2"));
-				currProduct.add(result.getString("P_City"));
-				currProduct.add(result.getString("P_State"));
-				currProduct.add(result.getString("P_Country"));
-				currProduct.add(result.getString("Email_Id"));
-				searchResult.add(currProduct);
+				Product p = new Product();
+				p.setAddress1(result.getString("address1"));
+				p.setAddress2(result.getString("address2"));
+				p.setUsername(result.getString("user_id"));
+				p.setId(result.getString("product_id"));
+				p.setName(result.getString("name"));
+				p.setPrice(result.getString("price"));
+				p.setDescription(result.getString("description"));
+				p.setCategory(result.getString("category"));
+				p.setQuality(result.getString("quality"));
+				p.setCity(result.getString("city"));
+				p.setState(result.getString("state"));
+				p.setCountry(result.getString("country"));
+				p.setEmailId(result.getString("email"));
+				p.setBidTime(result.getString("bid_time"));
+				p.setExpiryTime(result.getString("expirytime"));
+				
+				products.addProducts(p);
 
 			}
 			result.close();
@@ -95,7 +103,7 @@ public class ProductsDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return searchResult;
+		return products;
 	}
 
 	public Products getProductsByUser(String username) {
@@ -105,11 +113,11 @@ public class ProductsDao {
 			DB db = new DB();
 			Connection conn = db.getConnection();
 
-			String query = "SELECT Prod_Id, Prod_Name, P_Price, P_Description,"
-					+ " P_Category, P_Quality, P_Address_Line1, P_Address_Line2, "
-					+ "P_City, P_State, P_Country,Email_Id  "
-					+ "FROM user_data.product,users "
-					+ "WHERE Post_User_Id ='" + username + "' AND Post_User_Id= Username;" ;
+			String query = "SELECT p.product_id, p.name, p.price, p.description,"
+					+ " p.category, p.quality, u.address1, u.address2, "
+					+ " u.city, u.state, u.country, u.email, p.bid_time, p.expirytime  "
+					+ " FROM product p, users u "
+					+ " WHERE p.user_id ='" + username + "' AND p.user_id=u.username;" ;
 
 			Statement stmt = conn.createStatement();
 
@@ -120,19 +128,22 @@ public class ProductsDao {
 
 				Product p = new Product();
 
-				p.setId(result.getString("Prod_Id"));
-				p.setName(result.getString("Prod_Name"));
-				p.setPrice(result.getString("P_Price"));
-				p.setDescription(result.getString("P_Description"));
-				p.setCategory(result.getString("P_Category"));
-				p.setQuality(result.getString("P_Quality"));
-				p.setAddress1(result.getString("P_Address_Line1"));
-				p.setAddress2(result.getString("P_Address_Line2"));
-				p.setCity(result.getString("P_City"));
-				p.setState(result.getString("P_State"));
-				p.setCountry(result.getString("P_Country"));
-				p.setEmailId(result.getString("Email_Id"));
-
+				p.setId(result.getString("product_id"));
+				p.setName(result.getString("name"));
+				p.setPrice(result.getString("price"));
+				p.setDescription(result.getString("description"));
+				p.setCategory(result.getString("category"));
+				p.setQuality(result.getString("quality"));
+				p.setAddress1(result.getString("address1"));
+				p.setAddress2(result.getString("address2"));
+				p.setCity(result.getString("city"));
+				p.setState(result.getString("state"));
+				p.setCountry(result.getString("country"));
+				p.setEmailId(result.getString("email"));
+				p.setUsername(username);
+				p.setBidTime(result.getString("bid_time"));
+				p.setExpiryTime(result.getString("expirytime"));
+				
 				products.addProducts(p);
 
 			}
@@ -151,8 +162,8 @@ public class ProductsDao {
 			DB db = new DB();
 			Connection conn = db.getConnection();
 
-			String query = "DELETE FROM user_data.product "
-					+ "WHERE Prod_Id='" + itemid + "' AND Post_User_Id='" + username + "';";
+			String query = "DELETE FROM product "
+					+ "WHERE product_id='" + itemid + "' AND user_id='" + username + "';";
 
 			Statement stmt = conn.createStatement();
 
@@ -165,42 +176,49 @@ public class ProductsDao {
 		return result;
 	}
 
-	public ArrayList<ArrayList<String>> searchProducts(String text) {
+	public Products searchProducts(String text) {
 
 		logger.info("DATABASE: Search for products1: "+text);
 		
-		ArrayList<ArrayList<String>> searchResult = null;
-
+		Products products = new Products();
+		
 		try {
 			DB db = new DB();
 			Connection conn = db.getConnection();
 
-			String query = "SELECT * FROM user_data.product,users "
-					+ "WHERE Prod_Name LIKE '%" + text + "%' AND Post_User_Id = Username;";
+			String query = "SELECT * FROM product p, users u "
+					+ " WHERE p.name LIKE '%" + text + "%' AND p.user_id = u.username;";
 
 			Statement stmt1 = conn.createStatement();
 
 			ResultSet result = stmt1.executeQuery(query);
 			System.out.println("The sql statement is " + query);
 
-			searchResult = new ArrayList<ArrayList<String>>();
-			while (result.next()) {
-				ArrayList<String> currProduct = new ArrayList<String>();
-				currProduct.add(result.getString("Post_User_Id"));
-				currProduct.add(result.getString("Prod_Id"));
-				currProduct.add(result.getString("Prod_Name"));
-				currProduct.add(result.getString("P_Price"));
-				currProduct.add(result.getString("P_Description"));
-				currProduct.add(result.getString("P_Category"));
-				currProduct.add(result.getString("P_Quality"));
-				currProduct.add(result.getString("P_Address_Line1"));
-				currProduct.add(result.getString("P_Address_Line2"));
-				currProduct.add(result.getString("P_City"));
-				currProduct.add(result.getString("P_State"));
-				currProduct.add(result.getString("P_Country"));
-				currProduct.add(result.getString("Email_Id"));
 
-				searchResult.add(currProduct);
+			while (result.next()) {
+
+				Product p = new Product();
+				
+				p.setAddress1(result.getString("address1"));
+				p.setAddress2(result.getString("address2"));
+				p.setUsername(result.getString("user_id"));
+				p.setId(result.getString("product_id"));
+				p.setName(result.getString("name"));
+				p.setPrice(result.getString("price"));
+				p.setDescription(result.getString("description"));
+				p.setCategory(result.getString("category"));
+				p.setQuality(result.getString("quality"));
+				p.setAddress1(result.getString("address1"));
+				p.setAddress2(result.getString("address2"));
+				p.setCity(result.getString("city"));
+				p.setState(result.getString("state"));
+				p.setCountry(result.getString("country"));
+				p.setEmailId(result.getString("email"));
+				p.setBidTime(result.getString("bid_time"));
+				p.setExpiryTime(result.getString("expirytime"));
+				
+				products.addProducts(p);
+
 			}
 			System.out.println("The search result is got successfully.");
 
@@ -209,7 +227,7 @@ public class ProductsDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return searchResult;
+		return products;
 	}
 
 }

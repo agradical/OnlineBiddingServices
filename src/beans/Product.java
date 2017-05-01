@@ -17,6 +17,7 @@ public class Product {
 	private String bidTime = "";
 	private String expiryTime = "";
 	private String username = "";
+	private String minutes = "";
 	
 	public String getId() {
 		return id;
@@ -108,5 +109,11 @@ public class Product {
 	}
 	public void setExpiryTime(String expiryTime) {
 		this.expiryTime = expiryTime;
+	}
+	public String getMinutes() {
+		return minutes;
+	}
+	public void setMinutes(String minutes) {
+		this.minutes = minutes;
 	}	
 }
