@@ -4,10 +4,13 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.Client;
@@ -15,6 +18,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import DAO.ProductsDao;
+import auth.AuthKey;
 import beans.Products;
 import beans.User;
 
@@ -22,14 +26,22 @@ import beans.User;
 @Path("/deleteProductService")
 public class DeleteItemService {
 	
+	final static Logger logger = Logger.getLogger(DeleteItemService.class);
+	
 	@Path("/deletemicro")
 	@POST
 	@Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.APPLICATION_JSON)
-	public Response deletemicro(MultivaluedMap<String, String> formParam) {
+	public Response deletemicro(@Context HttpHeaders headers, MultivaluedMap<String, String> formParam) {
 						
-		String username = formParam.getFirst("username");
+		if(headers.getRequestHeader("secret") == null || !headers.getRequestHeader("secret").get(0).equals(AuthKey.KEY+"")) {
+			System.out.println(headers.getRequestHeader("secret"));
+			logger.info("Login Bad request without AuthKey");
+			return Response.status(302).entity("Unauthorized access").build();
+		}
 		
+		String username = formParam.getFirst("username");	
+
 		Client client1 = Client.create();
 		WebResource webResource1 = client1.resource("http://localhost:9090/OnlineBiddingMicroServices/rest/deleteItemMicroservices/delete");
 		

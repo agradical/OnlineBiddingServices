@@ -42,11 +42,13 @@ public class LoginServices {
 		
 		String username = formParam.getFirst("username");
 		String password = formParam.getFirst("password");
+		String location = formParam.getFirst("location");
 		
 		UserDao dao = new UserDao();
 		boolean isValidUser = dao.userLogin(username, password);
 		User user = new User();
 		if(isValidUser) {
+			dao.updateLocation(username, location);
 			user = dao.getUser(username);
 			logger.info("Login request:"+username+": SUCCESS");
 		}

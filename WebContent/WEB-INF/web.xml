@@ -17,10 +17,14 @@
       <param-name>debug</param-name>
       <param-value>true</param-value>
     </init-param>
+    <init-param>
+      <param-name>compressionThreshold</param-name>
+      <param-value>0</param-value>
+    </init-param>
   </filter>
   <filter-mapping>
     <filter-name>CompressingFilter</filter-name>
-    <url-pattern>/rest/*</url-pattern>
+    <url-pattern>/*</url-pattern>
   </filter-mapping>
   <error-page>
     <error-code>404</error-code>
@@ -44,4 +48,7 @@
     <servlet-name>SessionControllerServlet</servlet-name>
     <url-pattern>/rest/*</url-pattern>
   </servlet-mapping>
+  <listener>
+  	<listener-class>listener.Listener</listener-class>
+  </listener>
 </web-app>

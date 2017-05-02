@@ -18,6 +18,7 @@ public class Product {
 	private String expiryTime = "";
 	private String username = "";
 	private String minutes = "";
+	private String status = "";
 	
 	public String getId() {
 		return id;
@@ -115,5 +116,11 @@ public class Product {
 	}
 	public void setMinutes(String minutes) {
 		this.minutes = minutes;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}	
 }

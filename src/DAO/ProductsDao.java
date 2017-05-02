@@ -45,7 +45,7 @@ public class ProductsDao {
 					+ name + "','" + price + "','" + description + "','" 
 					+ category + "','" + quality + "','" + address1 + "','" 
 					+ address2 + "','" + city + "','" + state + "','" + country + "','" 
-					+ date_str + "','" + expiry_date_str +"');";
+					+ date_str + "','" + expiry_date_str +"','NEW');";
 			
 			System.out.println(query);
 			Statement stmt1 = conn.createStatement();
@@ -68,7 +68,7 @@ public class ProductsDao {
 
 			String query = "SELECT u.email, p.user_id, p.product_id, p.name, p.price,"
 					+ " p.description, p.category, p.quality, u.address1, u.address2,"
-					+ " u.city, u.state, u.country, p.bid_time, p.expirytime "
+					+ " u.city, u.state, u.country, p.bid_time, p.expirytime, p.status "
 					+ " FROM product p , users u"
 					+ " WHERE p.user_id=u.username;";
 
@@ -94,6 +94,7 @@ public class ProductsDao {
 				p.setEmailId(result.getString("email"));
 				p.setBidTime(result.getString("bid_time"));
 				p.setExpiryTime(result.getString("expirytime"));
+				p.setStatus(result.getString("status"));
 				
 				products.addProducts(p);
 
@@ -115,7 +116,7 @@ public class ProductsDao {
 
 			String query = "SELECT p.product_id, p.name, p.price, p.description,"
 					+ " p.category, p.quality, u.address1, u.address2, "
-					+ " u.city, u.state, u.country, u.email, p.bid_time, p.expirytime  "
+					+ " u.city, u.state, u.country, u.email, p.bid_time, p.expirytime, p.status  "
 					+ " FROM product p, users u "
 					+ " WHERE p.user_id ='" + username + "' AND p.user_id=u.username;" ;
 
@@ -140,6 +141,7 @@ public class ProductsDao {
 				p.setState(result.getString("state"));
 				p.setCountry(result.getString("country"));
 				p.setEmailId(result.getString("email"));
+				p.setStatus(result.getString("status"));
 				p.setUsername(username);
 				p.setBidTime(result.getString("bid_time"));
 				p.setExpiryTime(result.getString("expirytime"));
@@ -199,8 +201,6 @@ public class ProductsDao {
 
 				Product p = new Product();
 				
-				p.setAddress1(result.getString("address1"));
-				p.setAddress2(result.getString("address2"));
 				p.setUsername(result.getString("user_id"));
 				p.setId(result.getString("product_id"));
 				p.setName(result.getString("name"));
@@ -216,6 +216,7 @@ public class ProductsDao {
 				p.setEmailId(result.getString("email"));
 				p.setBidTime(result.getString("bid_time"));
 				p.setExpiryTime(result.getString("expirytime"));
+				p.setStatus(result.getString("status"));
 				
 				products.addProducts(p);
 
@@ -229,5 +230,54 @@ public class ProductsDao {
 		}
 		return products;
 	}
+	
+	public Products getExpiredProducts() {
+		
+		Products products = new Products();
+		try {
+			DB db = new DB();
+			Connection conn = db.getConnection();
+
+			String query = "SELECT * FROM product p WHERE NOW() > expirytime AND status NOT LIKE 'SOLD' ;";
+			Statement stmt = conn.createStatement();
+
+			ResultSet result = stmt.executeQuery(query);
+			System.out.println("The sql statement is " + query);
+
+			while (result.next()) {
+				//System.out.println("product");
+				Product p = new Product();
+
+				p.setId(result.getString("product_id"));
+			
+				products.addProducts(p);
+
+			}
+			result.close();
+			conn.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return products;
+	}
+	
+	public void markSold(Product p) {
+		String product_id = p.getId();
+		try {
+			DB db = new DB();
+			Connection conn = db.getConnection();
+	
+			String query = "UPDATE product "
+					+ "SET status='SOLD' "
+					+ "WHERE product_id = '"+product_id+"' ;";
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(query);
+			conn.close();
+		} catch(Exception e) {
+			
+		}
+		
+	} 
 
 }

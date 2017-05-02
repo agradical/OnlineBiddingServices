@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import DB.DB;
 import beans.Bid;
 import beans.Bids;
+import beans.Product;
 
 public class BidsDao {
 	final static Logger logger = Logger.getLogger(BidsDao.class);
@@ -77,6 +78,37 @@ public class BidsDao {
 			e.printStackTrace();
 		}
 		return bids;
+	}
+	
+	public Bid getHighestBidder(Product p) {
+		String product_id = p.getId();
+		Bid bid = null;
+		try {
+			DB db = new DB();
+			Connection conn = db.getConnection();
+
+			String sqlcmd1 = "SELECT * from bid WHERE product_id = '" + product_id + "' ORDER BY price  DESC LIMIT 1;";
+
+			Statement stmt = conn.createStatement();
+
+			ResultSet result = stmt.executeQuery(sqlcmd1);
+			System.out.println(sqlcmd1);
+			while (result.next()) {
+				bid.setId(result.getString("bid_id"));
+				bid.setItemId(result.getString("product_id"));
+				bid.setUsername(result.getString("bidder_id"));
+				bid.setSellerName(result.getString("user_id"));
+				bid.setPrice(result.getString("price"));
+				bid.setBuyerEmail(result.getString("bidder_email"));
+				bid.setSellerEmail(result.getString("user_email"));
+				break;
+			}
+			result.close();
+			conn.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return bid;
 	}
 
 }

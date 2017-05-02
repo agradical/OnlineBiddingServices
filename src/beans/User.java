@@ -21,6 +21,8 @@ public class User {
 	private String email = "";
 	private String dateofbirth = "";
 	
+	private String location = "";
+	
 	public String getUsername() {
 		return username;
 	}
@@ -104,6 +106,12 @@ public class User {
 	}
 	public void setDateofbirth(String dateofbirth) {
 		this.dateofbirth = dateofbirth;
+	}
+	public String getLocation() {
+		return location;
+	}
+	public void setLocation(String location) {
+		this.location = location;
 	}
 
 

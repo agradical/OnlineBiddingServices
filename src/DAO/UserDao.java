@@ -39,6 +39,21 @@ public class UserDao {
 		}
 		return false;
 	}
+	
+	public void updateLocation(String username, String location) {
+		try {
+			
+			DB db = new DB();
+			Connection conn = db.getConnection();
+			Statement stmt = conn.createStatement();
+			String query = "UPDATE users "
+					+ " SET lastlocation='"+location+"', lastlogintime=NOW() " 
+					+ " WHERE username = '"+username+"'; ";
+			stmt.executeUpdate(query);
+		} catch (Exception e) {
+			
+		}
+	}
 
 	public boolean userLogin(String username, String password) {
 		boolean success = false;
@@ -155,7 +170,7 @@ public class UserDao {
 
 	public boolean userSignUp(String username, String password, String firstName, String lastName, 
 			String email, String address1,String address2,String city, String state,
-			String country, String dateofbirth, String phone, String gender) {
+			String country, String dateofbirth, String phone, String gender, String location) {
 
 		logger.info("DATABASE: Registering new user: "+username);
 
@@ -175,8 +190,9 @@ public class UserDao {
 				String query2 = "INSERT INTO users VALUES ('" + username + "','" + firstName + "','" 
 						+ lastName + "','" + password + "','" + email + "','" + dateofbirth 
 						+ "','" + gender + "','" + city + "','" + state + "','" + country 
-						+ "','" + phone + "','" + address1 + "','" + address2 + "');";
+						+ "','" + phone + "','" + address1 + "','" + address2 +"','"+location+"', NOW());";
 				stmt.executeUpdate(query2);
+				System.out.println(query2);
 			}
 			result.close();
 			conn.close();

@@ -6,6 +6,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -17,6 +19,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import DAO.UserDao;
+import auth.AuthKey;
 import beans.User;
 
 @Path("/signupservices")
@@ -28,7 +31,14 @@ public class SignUpServices {
 	@POST
 	@Consumes("application/json")
     @Produces(MediaType.APPLICATION_JSON)
-	public Response addNewUserMicro(String data) {
+	public Response addNewUserMicro(@Context HttpHeaders headers, String data) {
+		
+
+		if(headers.getRequestHeader("secret") == null || !headers.getRequestHeader("secret").get(0).equals(AuthKey.KEY+"")) {
+			System.out.println(headers.getRequestHeader("secret"));
+			logger.info("Login Bad request without AuthKey");
+			return Response.status(302).entity("Unauthorized access").build();
+		}
 		
 		Gson gson = new Gson();
 		User user = gson.fromJson(data, User.class);
@@ -95,9 +105,11 @@ public class SignUpServices {
 		String city = user.getCity();
 		String state = user.getState();
 		String country = user.getCountry();
+		String location = user.getLocation();
 		
 		UserDao dao = new UserDao();
-		success = dao.userSignUp(username, password, firstName, lastName, emailAddress, address1,address2,city,state,country,dateofbirth, phone, gender);
+		success = dao.userSignUp(username, password, firstName, lastName, emailAddress, 
+				address1,address2,city,state,country,dateofbirth, phone, gender, location);
 		
 		if(success){
 			logger.info("Signup request: "+username+": SUCCESS");
